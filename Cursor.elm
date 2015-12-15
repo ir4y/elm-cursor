@@ -16,9 +16,6 @@ type alias Cursor a b =
 idL : Focus.Focus a a
 idL = Focus.create identity (\f r -> f r)
 
-atL : Int -> a -> Focus.Focus (Array.Array a) a
-atL index default = Focus.create ((Maybe.withDefault  default) << (Array.get index)) (\f r -> (Array.set index (f (Maybe.withDefault  default (Array.get index r))) r))
-
 createC : Signal.Mailbox a -> a -> Cursor a a
 createC mailbox state = { receiver = mailbox.address
                         , state = state
@@ -37,5 +34,6 @@ getC c1 = Focus.get c1.lens c1.state
 drawC : a -> (Cursor a a -> b) -> Signal.Signal b
 drawC state view = let
                        mailbox = Signal.mailbox state
+                       cursor = createC mailbox
                    in
-                       Signal.map ((createC mailbox) >> view)  mailbox.signal
+                       Signal.map (cursor >> view) mailbox.signal

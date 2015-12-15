@@ -4,7 +4,7 @@ import Cursor exposing(..)
 import Focus exposing((=>))
 
 import Html exposing (Html, text, p, div, button)
-import Html.Attributes
+import Html.Attributes as Attributes
 import Html.Events exposing (on, targetValue)
 
 import Json.Decode as Json
@@ -20,19 +20,23 @@ valueL = Focus.create .value (\f r -> { r | value = f r.value })
 counterL : Focus.Focus Store Int
 counterL = Focus.create .counter (\f r -> { r | counter = f r.counter })
 
-input : Cursor a String -> Html
-input cursor = Html.input [ Html.Attributes.value (getC cursor)
-                          , on "input" targetValue (setC cursor)
-                          ] []
-
 view : Cursor Store Store -> Html.Html
 view cursor = let
                  value = (cursor >=> valueL)
                  counter = (cursor >=> counterL)
-              in div[] [ p [] [text (getC value)]
-                       , input value
-                       , view_counter counter
-                       ]
+              in div [] [ view_input value
+                        , view_counter counter
+                        ]
+
+input : Cursor a String -> Html
+input cursor = Html.input [ Attributes.value (getC cursor)
+                          , on "input" targetValue (setC cursor)
+                          ] []
+
+view_input : Cursor Store String -> Html.Html
+view_input cursor = div [] [ p [] [text (getC cursor)]
+                           , input cursor
+                           ]
 
 dec a = a - 1
 inc a = a + 1
