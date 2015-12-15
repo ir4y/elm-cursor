@@ -2,7 +2,6 @@ module Cursor where
 
 import Array
 import Focus exposing ((=>))
-import Html exposing (Html)
 import Maybe
 
 type alias Cursor a b =
@@ -35,7 +34,7 @@ updateC c1 f = Signal.message c1.receiver (Focus.update c1.lens f c1.state)
 getC : Cursor a b -> b
 getC c1 = Focus.get c1.lens c1.state
 
-drawC : a -> (Cursor a a -> Html) -> Signal.Signal Html
+drawC : a -> (Cursor a a -> b) -> Signal.Signal b
 drawC state view = let
                        mailbox = Signal.mailbox state
                    in
