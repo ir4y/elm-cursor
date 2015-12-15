@@ -3,19 +3,24 @@ module Main where
 import Cursor exposing(..)
 import Focus exposing((=>))
 
-import Html exposing (Html, text, p, div)
+import Html exposing (Html, text, p, div, button)
 import Html.Attributes
 import Html.Events exposing (on, targetValue)
 
+import Json.Decode as Json
 
 type alias Store =
   { value: String
+  , counter: Int
   }
 
 valueL : Focus.Focus Store String
 valueL = Focus.create .value (\f r -> { r | value = f r.value })
 
-input : Cursor a String-> Html
+counterL : Focus.Focus Store Int
+counterL = Focus.create .counter (\f r -> { r | counter = f r.counter })
+
+input : Cursor a String -> Html
 input cursor = Html.input [ Html.Attributes.value (getC cursor)
                           , on "input" targetValue (setC cursor)
                           ] []
@@ -23,8 +28,20 @@ input cursor = Html.input [ Html.Attributes.value (getC cursor)
 view : Cursor Store Store -> Html.Html
 view cursor = let
                  value = (cursor >=> valueL)
+                 counter = (cursor >=> counterL)
               in div[] [ p [] [text (getC value)]
                        , input value
+                       , view_counter counter
                        ]
 
-main = drawC {value = "foo"} view
+dec a = a - 1
+inc a = a + 1
+
+view_counter : Cursor Store Int -> Html.Html
+view_counter cursor = div []
+                          [ button [ on "click" Json.value (\_ -> updateC cursor dec)] [ text "-" ]
+                          , div [] [ text (toString (getC cursor))]
+                          , button [ on "click" Json.value (\_ -> updateC cursor inc)] [ text "+" ]
+                          ]
+
+main = drawC {value = "foo", counter = 0} view
