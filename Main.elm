@@ -22,19 +22,19 @@ counterL = Focus.create .counter (\f r -> { r | counter = f r.counter })
 
 view : Cursor Store Store -> Html.Html
 view cursor = let
-                 value = (cursor >=> valueL)
-                 counter = (cursor >=> counterL)
+                 value = cursor >=> valueL
+                 counter = cursor >=> counterL
               in div [] [ view_input value
                         , view_counter counter
                         ]
 
 input : Cursor a String -> Html
-input cursor = Html.input [ Attributes.value (getC cursor)
-                          , on "input" targetValue (setC cursor)
+input cursor = Html.input [ Attributes.value <| getC cursor
+                          , on "input" targetValue <| setC cursor
                           ] []
 
 view_input : Cursor Store String -> Html.Html
-view_input cursor = div [] [ p [] [text (getC cursor)]
+view_input cursor = div [] [ p [] [text <| getC cursor]
                            , input cursor
                            ]
 
@@ -43,9 +43,9 @@ inc a = a + 1
 
 view_counter : Cursor Store Int -> Html.Html
 view_counter cursor = div []
-                          [ button [ on "click" Json.value (\_ -> updateC cursor dec)] [ text "-" ]
-                          , div [] [ text (toString (getC cursor))]
-                          , button [ on "click" Json.value (\_ -> updateC cursor inc)] [ text "+" ]
+                          [ button [ on "click" Json.value <| \_ -> updateC cursor dec] [ text "-" ]
+                          , div [] [ text << toString <| getC cursor]
+                          , button [ on "click" Json.value <| \_ -> updateC cursor inc] [ text "+" ]
                           ]
 
 main = drawC {value = "foo", counter = 0} view
