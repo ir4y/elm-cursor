@@ -5,7 +5,7 @@ import Focus exposing((=>))
 import Html exposing (Html, text, p, div, button)
 import Html.Attributes as Attributes
 import Html.Events exposing (on, targetValue)
-import Json.decode as Json
+import Json.Decode as Json
 
 
 type alias Store =
@@ -39,22 +39,24 @@ input cursor =
 
 view_input : Cursor Store String -> Html.Html
 view_input cursor =
-  div [] [ p [] [text <| getC cursor]
+  div [] [ p [] [ text <| getC cursor]
                 , input cursor
                 ]
 
-_dec a =
+dec_ a =
   a - 1
-_inc a =
+
+
+inc_ a =
   a + 1
 
 
 view_counter : Cursor Store Int -> Html.Html
 view_counter cursor =
   div []
-      [ button [ on "click" Json.value <| \_ -> updateC cursor _dec] [ text "-" ]
+      [ button [ on "click" Json.value <| \_ -> updateC cursor dec_] [ text "-" ]
       , div [] [ text << toString <| getC cursor]
-      , button [ on "click" Json.value <| \_ -> updateC cursor _inc] [ text "+" ]
+      , button [ on "click" Json.value <| \_ -> updateC cursor inc_] [ text "+" ]
       ]
 
 
