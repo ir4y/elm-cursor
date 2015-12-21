@@ -1,6 +1,6 @@
 import Cursor exposing(..)
 import Focus exposing((=>))
-import Html exposing (Html, text, p, div, button)
+import Html exposing (Html, text, p, div)
 import Html.Attributes as Attributes
 import Html.Events exposing (on, targetValue)
 import Json.Decode as Json
