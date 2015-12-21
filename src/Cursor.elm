@@ -1,6 +1,7 @@
 module Cursor (Cursor, (>=>), createC, drawC, getC, setC, updateC)  where
-{-| Alternative way to build elm app
-Just try it and forgot about signal hell.  
+{-| Alternative way to build elm app, 
+    this module contains all low level primitives 
+    to build elm app with high level cursor abstraction.
 
 # Cursor  
 @docs Cursor  
