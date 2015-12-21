@@ -1,5 +1,5 @@
 {
-    "version": "0.0.1",
+    "version": "1.0.0",
     "summary": "Reactive cursors for elm",
     "repository": "https://github.com/ir4y/elm-cursor.git",
     "license": "BSD3",
