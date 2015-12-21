@@ -30,10 +30,13 @@ input cursor =
 
 view_input : Cursor Store String -> Html.Html
 view_input cursor =
-  div [] [ p [] [ text Hello:
-                , text <| getC cursor]
-                , input cursor
+  div [] [ p [] [ text "Hello: "
+                , text <| getC cursor
+                , text " !"
                 ]
+         , p [] [ input cursor
+                ]
+         ]
 
 main =
-  drawC {value = "foo", counter = 0} view
+  drawC {value = ""} view
