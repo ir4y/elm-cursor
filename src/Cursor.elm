@@ -1,19 +1,19 @@
 module Cursor (Cursor, (>=>), createC, drawC, getC, setC, updateC)  where
-{-| Alternative way to build elm app, 
-    this module contains all low level primitives 
+{-| Alternative way to build elm app,
+    this module contains all low level primitives
     to build elm app with high level cursor abstraction.
 
-# Cursor  
-@docs Cursor  
+# Cursor
+@docs Cursor
 
-# Composition operator  
-@docs (>=>)  
+# Composition operator
+@docs (>=>)
 
-# Cursor helpers  
-@docs createC, drawC  
+# Cursor helpers
+@docs createC, drawC
 
-# Cursor modifiers  
-@docs getC, setC, updateC  
+# Cursor modifiers
+@docs getC, setC, updateC
 
 -}
 
