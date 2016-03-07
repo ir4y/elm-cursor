@@ -1,7 +1,7 @@
 {
     "version": "1.0.0",
     "summary": "Examples for elm-cursor",
-    "repository": "https://github.com/ir4y/cursoe.git",
+    "repository": "https://github.com/ir4y/elm-cursor.git",
     "license": "BDS3",
     "source-directories": [
         "src"

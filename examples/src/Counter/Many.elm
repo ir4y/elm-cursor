@@ -1,71 +1,87 @@
-module Single where
+module Counter.Many where
 
-import Cursor exposing(..)
-import Array
-import Counter.Counter as Counter
-import Focus exposing((=>))
+import Array exposing (Array)
 import Html exposing (Html)
 import Json.Decode as Json
-import Html exposing (Html, text, div, button)
+import Json.Encode
+import Maybe
+import Signal exposing (Signal, Message)
+
+import Html exposing (Html, text, div)
 import Html.Attributes exposing (style)
 import Html.Events exposing (on)
-import Json.Decode as Json
-import Maybe
+
+import Focus exposing (Focus, (=>))
+
+import Cursor exposing (Cursor, (>=>))
+
+import Counter.Counter as Counter
 
 
 type alias Store =
-  { counters: Array.Array Int
+  { counters_: Array Int
   }
 
 
-countersL : Focus.Focus Store (Array.Array Int)
-countersL =
-  Focus.create .counters (\f r -> { r | counters = f r.counters })
+counters : Focus Store (Array Int)
+counters =
+  Focus.create .counters_ (\f r -> { r | counters_ = f r.counters_ })
 
 
-atL : Int -> a -> Focus.Focus (Array.Array a) a
-atL index default =
+at : Int -> a -> Focus (Array a) a
+at index default =
   let
-    getter = ((Maybe.withDefault  default) << (Array.get index))
-    setter = (\f r -> (Array.set index (f (Maybe.withDefault  default (Array.get index r))) r))
+    getter = Maybe.withDefault default << Array.get index
+    setter f r =
+      Array.set index
+             (f (Maybe.withDefault default (Array.get index r))) r
   in
     Focus.create getter setter
 
 
-view_counter : Cursor Store (Array.Array Int) -> Int -> Int -> Html
-view_counter counters index _ =
+button : (Json.Encode.Value -> Message) -> String -> Html
+button f t =
+  Html.button
+        [ on "click" Json.value f ]
+        [ text t ]
+
+
+viewCounter : Cursor Store (Array Int) -> Int -> Int -> Html
+viewCounter cursor index _ =
   let
-    c = counters >=> (atL index -1)
+    counter = cursor >=> at index -1
   in
-    div [ countStyle ] [ Counter.view c
-           , button [ on "click" Json.value <| \_ -> updateC counters <| removeItem index] [text "X"]
-           ]
+    div [ Counter.countStyle ]
+      [ Counter.view counter
+      , button (\_ -> Cursor.update cursor <| removeItem index) "X"
+      ]
 
-addItem : Array.Array Int -> Array.Array Int
-addItem counters = Array.push 0 counters
 
-removeItem : Int -> Array.Array Int -> Array.Array Int
-removeItem index cs = Array.append (Array.slice 0 index cs) (Array.slice (index + 1) (Array.length cs) cs)
+addItem : Array Int -> Array Int
+addItem counters =
+  Array.push 0 counters
+
+
+removeItem : Int -> Array Int -> Array Int
+removeItem index cs =
+  Array.append (Array.slice 0 index cs)
+  <| Array.slice (index + 1) (Array.length cs) cs
+
 
 view : Cursor Store Store -> Html.Html
 view cursor =
   let
-    counters = cursor >=> countersL
+    cs = cursor >=> counters
   in
-    div [] [ button [ on "click" Json.value <| \_ -> updateC counters addItem] [ text "Add item" ]
-           , div [] <| Array.toList (Array.indexedMap (view_counter counters) (getC counters))
-           ]
+    div []
+      [ button (\_ -> Cursor.update cs addItem) "Add item"
+      , div []
+          <| Array.toList
+          <| Array.indexedMap (viewCounter cs)
+          <| Cursor.get cs
+      ]
 
 
+main : Signal Html
 main =
-  drawC {counters = Array.fromList []} view
-
-countStyle : Html.Attribute
-countStyle =
-  style
-    [ ("font-size", "20px")
-    , ("font-family", "monospace")
-    , ("display", "inline-block")
-    , ("width", "50px")
-    , ("text-align", "center")
-    ]
+  Cursor.start { counters_ = Array.fromList [] } view
