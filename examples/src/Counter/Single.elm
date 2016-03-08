@@ -1,28 +1,32 @@
-module Single where
+module Counter.Single where
 
-import Cursor exposing(..)
-import Counter.Counter as Counter
-import Focus exposing((=>))
-import Html exposing (Html)
 import Json.Decode as Json
+import Signal exposing (Signal)
+
+import Html exposing (Html)
+
+import Focus exposing (Focus, (=>))
+
+import Cursor exposing (Cursor, (>=>))
+
+import Counter.Counter as Counter
 
 
 type alias Store =
-  { counter: Int
+  { counter_: Int
   }
 
 
-counterL : Focus.Focus Store Int
-counterL =
-  Focus.create .counter (\f r -> { r | counter = f r.counter })
+counter : Focus Store Int
+counter =
+  Focus.create .counter_ (\f r -> { r | counter_ = f r.counter_ })
 
 
-view : Cursor Store Store -> Html.Html
+view : Cursor Store Store -> Html
 view cursor =
-  let
-     counter = cursor >=> counterL
-  in Counter.view counter
+  Counter.view <| cursor >=> counter
 
 
+main : Signal Html
 main =
-  drawC {counter = 0} view
+  Cursor.start { counter_ = 0 } view

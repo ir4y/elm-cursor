@@ -1,4 +1,9 @@
-module Cursor (Cursor, (>=>), createC, drawC, getC, setC, updateC)  where
+module Cursor
+  ( Cursor, (>=>)
+  , cursor, start
+  , get, set, update
+  ) where
+
 {-| Alternative way to build elm app,
     this module contains all low level primitives
     to build elm app with high level cursor abstraction.
@@ -10,19 +15,20 @@ module Cursor (Cursor, (>=>), createC, drawC, getC, setC, updateC)  where
 @docs (>=>)
 
 # Cursor helpers
-@docs createC, drawC
+@docs cursor, start
 
 # Cursor modifiers
-@docs getC, setC, updateC
+@docs get, set, update
 
 -}
 
 import Array
-import Focus exposing ((=>))
+import Focus exposing (Focus, (=>))
 import Maybe
+import Signal exposing (Signal, Message, Mailbox)
 
 
-{-| Base type, the triplet of state, signal ans lens
+{-| Base type, the triplet of state, signal and lens
  -}
 type alias Cursor a b =
   { receiver : Signal.Address a
@@ -33,51 +39,53 @@ type alias Cursor a b =
 
 {-| Composition operator, allow to go deeper in state via lens
  -}
-(>=>) : Cursor a b -> Focus.Focus b c -> Cursor a c
-(>=>) c1 f1 =
-  { c1 | lens = (c1.lens => f1) }
+(>=>) : Cursor a b -> Focus b c -> Cursor a c
+(>=>) cursor focus =
+  { cursor | lens = (cursor.lens => focus) }
 
 
-idL : Focus.Focus a a
-idL =
+id : Focus a a
+id =
   Focus.create identity (\f r -> f r)
 
 
-{-| Helper to create a Cursor form signal mail box and initia state data
+{-| Helper to create a Cursor form signal mail box and initial state data
 -}
-createC : Signal.Mailbox a -> a -> Cursor a a
-createC mailbox state =
+cursor : Mailbox a -> a -> Cursor a a
+cursor mailbox state =
   { receiver = mailbox.address
   , state = state
-  , lens = idL
+  , lens = id
   }
+
+
+{-| Get cursor value
+ -}
+get : Cursor a b -> b
+get c =
+  Focus.get c.lens c.state
 
 
 {-| Set cursor value
  -}
-setC : Cursor a b -> b -> Signal.Message
-setC c1 v =
-  Signal.message c1.receiver (Focus.set c1.lens v c1.state)
+set : Cursor a b -> b -> Message
+set c v =
+  Signal.message c.receiver (Focus.set c.lens v c.state)
+
 
 {-| Update cursor value via f
  -}
-updateC : Cursor a b -> (b -> b) -> Signal.Message
-updateC c1 f =
-  Signal.message c1.receiver (Focus.update c1.lens f c1.state)
-
-{-| Get cursor value
- -}
-getC : Cursor a b -> b
-getC c1 =
-  Focus.get c1.lens c1.state
+update : Cursor a b -> (b -> b) -> Message
+update c f =
+  Signal.message c.receiver (Focus.update c.lens f c.state)
 
 
 {-| Create render loop for cursor
 -}
-drawC : a -> (Cursor a a -> b) -> Signal.Signal b
-drawC state view =
+start : a -> (Cursor a a -> b) -> Signal b
+start state view =
   let
-     mailbox = Signal.mailbox state
-     cursor = createC mailbox
+    mailbox = Signal.mailbox state
+    c = cursor mailbox
   in
-     Signal.map (cursor >> view) mailbox.signal
+    Signal.map (c >> view) mailbox.signal

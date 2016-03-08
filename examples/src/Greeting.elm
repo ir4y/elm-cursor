@@ -1,42 +1,51 @@
-import Cursor exposing(..)
-import Focus exposing((=>))
+module Greeting where
+
 import Html exposing (Html, text, p, div)
 import Html.Attributes as Attributes
 import Html.Events exposing (on, targetValue)
-import Json.Decode as Json
+
+import Focus exposing (Focus)
+
+import Cursor exposing (Cursor, (>=>))
 
 
 type alias Store =
-  { value: String
+  { value_: String
   }
 
 
-valueL : Focus.Focus Store String
-valueL =
-  Focus.create .value (\f r -> { r | value = f r.value })
+value : Focus Store String
+value =
+  Focus.create .value_ (\f r -> { r | value_ = f r.value_ })
 
 
-view : Cursor Store Store -> Html.Html
+view : Cursor Store Store -> Html
 view cursor =
-  let
-     value = cursor >=> valueL
-  in div [] [ view_input value ]
+  viewInput <| cursor >=> value
+
 
 input : Cursor a String -> Html
 input cursor =
-    Html.input [ Attributes.value <| getC cursor
-               , on "input" targetValue <| setC cursor
-               ] []
+  Html.input
+    [ Attributes.value <| Cursor.get cursor
+    , on "input" targetValue <| Cursor.set cursor
+    ] []
 
-view_input : Cursor Store String -> Html.Html
-view_input cursor =
-  div [] [ p [] [ text "Hello: "
-                , text <| getC cursor
-                , text " !"
-                ]
-         , p [] [ input cursor
-                ]
-         ]
 
+viewInput : Cursor Store String -> Html
+viewInput cursor =
+  div []
+    [ p []
+        [ text "Hello: "
+        , text <| Cursor.get cursor
+        , text " !"
+        ]
+    , p []
+        [ input cursor
+        ]
+    ]
+
+
+main : Signal Html
 main =
-  drawC {value = ""} view
+  Cursor.start { value_ = "" } view
